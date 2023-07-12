@@ -11,7 +11,9 @@ import datetime
 import random
 
 apiBaseUrl = "https://api.tagntrac.io/device/v2/loggers/schedule/command"
-idToken = ""
+idToken = " "
+type = ["new", "append"]
+command = ["uploadAndReset, upload, reset, healthcheck, configureAndReset"]
 
 class Logger:
     def __init__(self, deviceId, command, profile, project, deprovision, lookback_hours):
@@ -21,6 +23,9 @@ class Logger:
         self.project = project
         self.deprovision = deprovision
         self.lookback_hours = lookback_hours
+
+loggers = []
+commands = []
 
 class Gateway:
     def __init__(self, site, zone):
@@ -38,32 +43,32 @@ def send_webhooks(webhooks, desired_object):
         response = requests.post(webhook, json=payload, headers=headers)
         
 
-def process_schedule_command(apiBaseUrl, idToken, webhooks, site, zone, type, loggers):
+def process_schedule_command(apiBaseUrl, idToken, webhooks, site, zone, type, loggers_data):
     # 1. organizationId is derived from the token.
     organizationId = get_organization_id_from_token(idToken)
 
     # 2. Logger meta-data is fetched from RDS using all deviceIds and organizationId.
-    logger_metadata = get_logger_metadata(loggers, organizationId)
+    loggers_data = loggers
 
     # 3. If none of the logger belongs to the organization of the authenticated user, an error is returned.
-    if not logger_metadata:
+    if not loggers_data:
         return {"error": "None of the loggers belong to the organization."}
 
     # 4. In a loop, the lastUploadedAt field of each logger is checked to see if it is before the number of lookback_hours from now or not.
     # 5. If yes, the command payload is formed for each logger and added in ble_cmds array. If no, the logger info is discarded.
     ble_cmds = []
     current_time = datetime.datetime.now()
-    for logger in logger_metadata:
-        last_uploaded_at = logger["lastUploadedAt"]
-        time_diff = current_time - last_uploaded_at
+    for logger in loggers_data:
+        last_uploaded = logger.lastUploadedAt
+        time_diff = current_time - last_uploaded
         if time_diff.total_seconds() / 3600 > logger["lookback_hours"]:
             ble_cmd = {
-                "addr": logger["deviceId"],
-                "cmd": logger["command"],
-                "profileId": logger["profile"],
-                "project": logger["project"],
-                "deprovision": logger["deprovision"],
-                "lookback_hours": logger["lookback_hours"]
+                "deviceID": logger.deviceId,
+                "command": logger.command,
+                "profile": logger.profile,
+                "project": logger.project,
+                "deprovision": logger.deprovision,
+                "lookback_hours": logger.lookback_hours
             }
             ble_cmds.append(ble_cmd)
 
@@ -107,21 +112,7 @@ def get_organization_id_from_token(idToken):
     # Replace with your implementation to extract organizationId from the idToken
     return "your_organization_id"
 
-def get_logger_metadata(loggers, organizationId):
-    # Replace with your implementation to fetch logger metadata from RDS using the provided loggers and organizationId
-    logger_metadata = []
-    for logger in loggers:
-        # Query RDS to get logger metadata
-        metadata = {
-            "deviceId": logger.deviceId,
-            "command": logger.command,
-            "profile": logger.profile,
-            "project": logger.project,
-            "deprovision": logger.deprovision,
-            "lookback_hours": logger.lookback_hours
-        }
-        logger_metadata.append(metadata)
-    return logger_metadata
+
 
 def deprovision_logger(logger):
     # Replace with your implementation to perform deprovisioning action for the logger
