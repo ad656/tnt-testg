@@ -10,7 +10,7 @@ import datetime
 
 
 url = "https://api.staging.tagntrac.io/v2/loggers/schedule/command"
- 
+
 
 loggers = [{"deviceId": "C46A7CF96BA0",
         "command":"uploadAndReset",
@@ -22,7 +22,7 @@ loggers = [{"deviceId": "C46A7CF96BA0",
         "command":"uploadAndReset",
         "profile": 1,
         "project" : "LOGGER",
-        "deprovision" : True,
+        "deprovision" : False,
         "lookback_hours" : 24}]
 
 headers = {
@@ -30,18 +30,27 @@ headers = {
         "Content-Type": "application/json"
     }
 
-payload = {
-    "webhooks": ["https://webhook.site/ca160ddf-77c6-4f00-9ec3-78262009eefb"], 
-        "site": "TNT_Campbeel",
-        "zone": "z-T32224",
-        "type": "append",
-        "loggers": loggers
-}
+payload = json.dumps({
+    "webhooks": ["https://webhook.site/ca160ddf-77c6-4f00-9ec3-78262009eefb"],   
+      "site": "TNT_Campbeel",   
+      "zone": "z-T32224",    
+      "type": "append",    
+      "loggers": [{"deviceId": "C46A7CF980EF",        
+                "command": "uploadAndReset",        
+                "profile": 1,        
+                "project": "Pfizer",        
+                "deprovision": True,        
+                "lookback_hours": 24}, 
+                {"deviceId": "C46A7CF980F8",        
+                 "command": "uploadAndReset",        
+                 "profile": 1,        
+                 "project": "Pfizer",        
+                 "deprovision": False,        
+                 "lookback_hours": 24}]
+})
 
 print("\n\n>>>>>>>>>>>>>>>>>>>>>")
 print(str(datetime.datetime.now()))
 response = requests.request("Post", url, headers=headers, data=payload)
 rsp = json.loads(response.text)
 print(rsp)
-
-
