@@ -1,4 +1,3 @@
-
 import paho.mqtt.client
 import time
 import struct
