@@ -8,39 +8,9 @@ import psycopg2
 import requests
 import datetime
 
-apiToken = None
-apiKey = None
+
 url = "https://api.staging.tagntrac.io/v2/loggers/schedule/command"
-
-
-#caPath = "C:\Users\tagnt\Downloads\AmazonRootCA1.pem"
-#certPath = "C:\Users\tagnt\Downloads\certificate.pem.crt"
-#keyPath = "C:\Users\tagnt\Downloads\private.pem.key"
-
-#class apiUser:
-    #def __init__(self, id, pwd):
-       # self.id = id
-       # self.pwd = pwd
-
-#    def login():
-#        global apiToken
-#        global apiKey
- #       url = "https://api.staging.tagntrac.io/v2/login"
-  #      payload = json.dumps({
-   #         "emailId": "{0}".format(id),
-    #        "userSecret": "{0}".format(pwd),
-     #   })
-      #  headers = {
-     #   'Origin': 'DOC.API',
-      #  'Content-Type': 'application/json'
-       # }
-       # response = requests.request("POST", url, headers=headers, data=payload)
-        #rsp = json.loads(response.text)
-        #assert rsp['status'] == "SUCCESS", "login fail"
-        #print("Login as user: {0}".format(rsp['user']['userName']))
-        #apiToken = rsp['token']
-        #apiKey = rsp['clientApiKey']['clientId']
-        #return True    
+ 
 
 loggers = [{"deviceId": "C46A7CF96BA0",
         "command":"uploadAndReset",
