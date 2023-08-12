@@ -7,7 +7,8 @@ import queue
 import sys
 import ssl
 import json
-
+import matplotlib.pyplot as mp
+import numpy as np
 ##import email
 ##import pwd
 import requests
@@ -52,9 +53,9 @@ name_devlist='sdlist1000'
 #name_devlist = 'sdlist11'
 #fname_devlist = [sdlist20]
 #name_devlist = 'sdlist7'
-fname_devlist = [sdlist20]
+fname_devlist = [sdlist10]
 list_size = 100
-segments = 1
+segments = 5
 #list_size = 2
 
 payload={}
@@ -70,13 +71,15 @@ maxDelay = 1500
 cycle = 3
 this = []
 delayed = []
+times = np.array([])
 #GW = 'deviceId-354616091124235' # new SP v79
 
 GW = 'GWT53475'
 GW = 'GWT53475'
 GW = 'GWT53485'
 GW = 'GWT53477'
-GW = 'GWT53479'
+#GW = 'GWT53479'
+GW - 'GWT53500'
 #GW = 'GWT53493'
 
 cmd = 'gethealth'
@@ -483,134 +486,66 @@ if __name__=="__main__":
         loggerDev = logger(dev)
         stat = 'err'
         healthStatus = False
-        cycle = 1
-        for i_cycle in range(cycle):
-            if healthStatus is True:
-                continue
-            time.sleep(i_cycle*15)
+        if healthStatus is True:
+            continue
+        time.sleep(9)
                 
-            fprint("=======",dev,index+1,i_cycle+1 ,time.asctime())
+        fprint("=======",dev,index+1,time.asctime())
             
-            #loggerDev = logger(dev)
+        #loggerDev = logger(dev)
 
-            if cmd == 'gethealth':
+        if cmd == 'gethealth':
                 #if loggerDev.getHealth() is False: continue
-                loggerDev.getHealth()
-                loggerDev.chkHealth()
+            loggerDev.getHealth()
+            loggerDev.chkHealth()
 
-            elif cmd =='alert':
-                loggerDev.updateBLEGatewayConfig(GW,'alert')
-                if loggerDev.status == 'SUCCESS' :
-                    startTime = time.time()
-                    delay = 0
-                    while healthStatus is False and delay < maxDelay:
-                        time.sleep(3)
-                        delay += 3
-                        loggerDev.getDeviceHealth()
-                        if loggerDev.command_success:
+        elif cmd == 'read':
+            loggerDev.updateBLEGatewayConfig(GW,'read')
+            if loggerDev.status == 'SUCCESS':
+                startTime = time.time()
+
+                #sleep 5s
+                time.sleep(5)
+                healthStatus = False
+                stat = 'errTimeout'
+                delay = 0
+                
+                cmdFailCount = 0
+                # either endtime<100 or success=true
+                while not healthStatus and delay < maxDelay:
+                    time.sleep(1)
+                    delay += 1
+                    loggerDev.getDeviceHealth()
+                    if loggerDev.config_endTime != None:
+                        delta = time.time()-loggerDev.config_endTime
+                        if delta < 100:
+                            fprint("endTime changed: {0} seconds ago".format(int(delta)))
                             healthStatus = True
-                            stat = 'success'
-                            
-                            lastReset=loggerDev.lastResetAt-startTime
-                            fprint("INFO:  lastReset {0:.0f} seconds".format(lastReset))
+                            stat = 'success_norsp'
+                            if loggerDev.command_success == True:
+                                stat = 'success'
                             break
-                
-                    fprint(healthStatus, stat)
-                    if stat == 'success':
-                        data.append([dev,'connect'+str(i_cycle+1), stat, time.time() - startTime])
-                        fprint("INFO: lastReset status {0} time: {1} seconds".format(healthStatus, time.time() - startTime))
+                        else:
+                            fprint("***INF: no endTime change")
+                if delay>maxDelay:
+                    delayed.append(loggerDev)
+                    print(f"{loggerDev.addr} took over {maxDelay} seconds, will check again after other loggers finish")
+                fprint(healthStatus, stat)
 
+                if stat == 'success' or stat == 'success_norsp':
+                    #endtime_list[index] = time.time() - startTime
+                    data.append([dev, 'connect',stat, time.time() - startTime])
+                    app = np.array([time.time() - startTime])
+                    times = np.append(times, app)
 
-            elif cmd == 'reset':
-                loggerDev.updateBLEGatewayConfig(GW,'reset')
-                if loggerDev.status == 'SUCCESS' :
-                    startTime = time.time()
-                    delay = 0
-                    
-                    while healthStatus is False and delay < maxDelay:
-                        time.sleep(3)
-                        delay += 3
-                        loggerDev.getDeviceHealth()
-                        if loggerDev.command_success:
-                            healthStatus = True
-                            stat = 'success'
-                            
-                            lastReset=loggerDev.lastResetAt-startTime
-                            fprint("INFO:  lastReset {0:.0f} seconds".format(lastReset))
-                            break
-                
-                    fprint(healthStatus, stat)
-                    if stat == 'success':
-                        data.append([dev,'connect'+str(i_cycle+1), stat, time.time() - startTime])
-                        fprint("INFO: lastReset status {0} time: {1} seconds".format(healthStatus, time.time() - startTime))
-
-            elif cmd == 'configAndReset':
-                loggerDev.updateBLEGatewayConfig(GW,'configAndReset')
-                if loggerDev.status == 'SUCCESS' :
-                    startTime = time.time()
-                    delay = 0
-                    
-                    while healthStatus is False and delay < maxDelay:
-                        time.sleep(3)
-                        delay += 3
-                        loggerDev.getDeviceHealth()
-                        if loggerDev.command_success:
-                            healthStatus = True
-                            stat = 'success'
-                            
-                            lastReset=loggerDev.lastResetAt-startTime
-                            fprint("INFO:  lastReset {0:.0f} seconds".format(lastReset))
-                            break
-                
-                    fprint(healthStatus, stat)
-                    if stat == 'success':
-                        data.append([dev,'connect'+str(i_cycle+1), stat, time.time() - startTime])
-                        fprint("INFO: lastReset status {0} time: {1} seconds".format(healthStatus, time.time() - startTime))
-                 
-            elif cmd == 'read':
-                loggerDev.updateBLEGatewayConfig(GW,'read')
-                if loggerDev.status == 'SUCCESS':
-                    startTime = time.time()
-
-                    #sleep 5s
-                    time.sleep(5)
-                    healthStatus = False
-                    stat = 'errTimeout'
-                    delay = 0
-                
-                    cmdFailCount = 0
-                    # either endtime<100 or success=true
-                    while not healthStatus and delay < maxDelay:
-                        time.sleep(1)
-                        delay += 1
-                        loggerDev.getDeviceHealth()
-                        if loggerDev.config_endTime != None:
-                            delta = time.time()-loggerDev.config_endTime
-                            if delta < 100:
-                                fprint("endTime changed: {0} seconds ago".format(int(delta)))
-                                healthStatus = True
-                                stat = 'success_norsp'
-                                if loggerDev.command_success == True:
-                                    stat = 'success'
-                                break
-                            else:
-                                fprint("***INF: no endTime change")
-                    if delay>maxDelay:
-                        delayed.append(loggerDev)
-                        print(f"{loggerDev.addr} took over {maxDelay} seconds, will check again after other loggers finish")
-                    fprint(healthStatus, stat)
-
-                    if stat == 'success' or stat == 'success_norsp':
-                        #endtime_list[index] = time.time() - startTime
-                        data.append([dev, 'connect'+str(i_cycle+1),stat, time.time() - startTime])
                                           
-                        fprint("INFO:  {0} time: {1:.0f} seconds".format(stat, ((time.time() - startTime))))
+                    fprint("INFO:  {0} time: {1:.0f} seconds".format(stat, ((time.time() - startTime))))
                     
                 loggerDev.chkHealth()
 
             df = pd.DataFrame(data, columns=['addr', 'trial','stat', 'delay'])
             fprint('<=50s:\t',len(df[df['delay']<=50]))
-            fprint('<=100s:\t',len(df[df['delay']>50]))
+            fprint('>50s, <=100s:\t',len(df[df['delay']>50]))
             fprint(df.stat.value_counts())
             fprint(df.trial.value_counts())
             fprint(df.describe())
@@ -625,8 +560,22 @@ if __name__=="__main__":
            #     stat = 'success_norsp'
             #    if loggerDev.command_success == True:
              #       stat = 'success'
-    
+    bins = 0
+    if len(times)<=25:
+        bins = 25
+    else:
+        bins = len(times)
+
+    data1 = times
+
+    fig, ax = mp.subplots()
+    ax.hist(data1, bins)
+    ax.set_xlabel('Time taken')
+    ax.set_ylabel('Frequency')
+    ax.set_title('Histogram of times')
     fprint('test lasts: ',time.time()-test_start) 
     fprint('UpdateBLEconfig', runs)
+    mp.show()
+    
     #assert len(data)>= len(addr_list)*0.7
 
