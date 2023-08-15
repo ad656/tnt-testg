@@ -1,4 +1,4 @@
-#Much simpler and better version of gw_monitor
+#Much simpler and cleaner of gw_monitor
 #Changes made by A D
 #for TagNTrac
 
@@ -22,66 +22,8 @@ AWS_PORT = 8883
 sub_delay =0.05
 loggers = []
 
-#GW = 'deviceId-354616090682316' #-venu
-#GW = 'deviceId-354616090650990' #-airsave
-#GW = 'deviceId-354616090650883' #-airsave
-#GW = 'deviceId-354616090683082' #-airsave
-#GW = 'deviceId-354616090639969' #-airsave
-
-#GW = 'deviceId-354616091134838' #-wen v82
-#GW = 'deviceId-354616091125455'  # v82
-GW = 'deviceId-354616091004130' #83
-#GW = "deviceId-354616091134754"
-#GW = "deviceId-354616091141239"
-#GW = "deviceId-354616091113477"
-#GW = "deviceId-354616091000575"
-
-GW = 'deviceId-354616091124235'
-#GW = 'deviceId-354616091140538'
-#GW = 'IG60-44E888'
-##GW = 'IG60-64529C'
-##GW = 'IG60-1'
-##GW = 'IG60-64F250'
-#GW = 'IG60-3'
-#GW = 'OWEN-PI3'
-#GW = 'GWS79025'
-##GW = 'GWT34552'
-#GW = 'GWT34550'
-##GW = 'GWT32230'
-#GW = 'GWT32226'
-##GW = 'GWT32230'
-##GW = 'GWT34555'
-##GW = 'GWT34553'
-#GW = 'GWT33467'
-#GW = "deviceId-354616091113477"
-#GW = 'GWS97118'
-#GW = 'GWS97127'
-#GW = 'GWS97118'
-#GW = 'GWS97122'
-#GW = 'GWT50605'
-#GW = 'GWT50613'#good
-#GW = 'GWT50620'
-#GW = 'GWT50641' #gggood
-##GW = 'GWT50594'
-##GW = 'GWT50627'
-
-##GW = 'GWT34554'
-##GW = 'GWS97059'
-##GW = 'GWS97069'
-##GW = 'GWS97119'
-#GW = 'GWT53488'
-#GW = 'GWS97112'
-#GW = 'GWS96929'
-#GW = 'GWS96915'
-#GW =  'GWT53479'
 GW = 'GWS97099'
-#GW = 'GWS96925'
-#GW = 'T50598GWT53478'
-#GW = 'GWS96918'
-#GW = 'GWS97130'
-#GW = 'GWS96911'
-#GW = 'GWS96916'
-#GW =  'GWT53488'
+
 
 msg_queue = queue.Queue()
 sub_list =[
